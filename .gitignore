@@ -1,0 +1,40 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment
+venv/
+.env/
+.venv/
+
+# Model files
+ppo_tvc.zip
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python packaging
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Logs and temp
+*.log
+*.tmp
+
+# Virtual environment-specific binaries
+bin/
+lib/
+include/
+
+# Ignore README backup or temporary files
+README.md~
