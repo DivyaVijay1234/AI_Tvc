@@ -1,0 +1,15 @@
+stable-baselines3[extra]
+gymnasium
+torch
+torchvision
+torchaudio
+numpy
+pandas
+matplotlib
+seaborn
+tqdm
+opencv-python
+jupyterlab
+ipykernel
+scikit-learn
+pyserial
