@@ -6,19 +6,23 @@ This project implements a real-time AI-driven thrust vector control (TVC) system
 
 ## 📦 Project Structure
 
-tvc_project/
-├── rocket_tvc_env.py # Custom Gym environment with real-time IMU input
-├── rocket_simulator.py # Physics-based rocket simulation
-├── train_ppo_tvc.py # Train PPO agent in simulation
-├── test_ppo_tvc.py # Test PPO agent with real-time hardware loop
-├── evaluate_tvc.py # Simple evaluation loop with rendering
-├── plot_tvc_log.py # Plot TVC control data
-├── imu_reader.py # Reads IMU pitch/yaw data over serial
-├── servo_controller.py # Sends pitch/yaw gimbal commands over serial
-├── tvc_control_log.csv # Logged control outputs
-├── ppo_tvc_model.zip # Trained PPO model
-├── requirements.txt # Python dependencies
-└── README.md # Project documentation
+```
+AI-TVC/
+├── rocket_tvc_env.py          # Custom Gym environment for TVC control
+├── rocket_simulator.py        # Physics-based rocket simulation with visualization
+├── train_ppo_tvc.py          # Train PPO agent in simulation
+├── test_ppo_tvc.py           # Test PPO agent with real-time hardware loop
+├── evaluate_tvc.py           # Evaluation loop with rendering and statistics
+├── safe_training.py          # Safe training wrapper with early stopping
+├── imu_reader.py             # Reads IMU pitch/yaw data over serial
+├── servo_controller.py       # Sends pitch/yaw gimbal commands over serial
+├── tvc_control_log.csv       # Logged control outputs
+├── final_model.zip           # Final trained PPO model (for distribution)
+├── best_model/               # Best model directory
+├── requirements.txt          # Python dependencies
+├── .gitignore               # Git ignore patterns
+└── README.md                # Project documentation
+```
 
 ---
 
@@ -29,6 +33,7 @@ tvc_project/
 - Replace dummy simulation values with real-time IMU feedback
 - Actuate servos for gimbal pitch/yaw correction
 - Log and visualize performance data
+- Provide safe training with early stopping mechanisms
 
 ---
 
@@ -37,34 +42,41 @@ tvc_project/
 ### Physics Simulation
 - Realistic rocket physics including:
   - Mass and inertia calculations
-  - Thrust vector control
+  - Thrust vector control with gimbal limits
   - Gravity and drag forces
-  - Angular momentum
+  - Angular momentum and stability
 - Configurable parameters:
   - Rocket dimensions and mass
-  - Thrust magnitude
-  - Environmental conditions
-  - Control limits
+  - Thrust magnitude (20N default)
+  - Environmental conditions (gravity, air density)
+  - Control limits (10° gimbal max angle)
 
-### Visualization
-- Real-time 2D visualization of:
+### Real-time Visualization
+- Interactive 2D visualization showing:
   - Rocket position and orientation
-  - Thrust vector direction
+  - Thrust vector direction (red arrow)
+  - Velocity vector (green arrow)
+  - Gravity force (purple arrow)
+  - Angular velocity (orange arrow)
   - Trajectory path
-- Performance plots:
-  - Position vs time
-  - Orientation angles
-  - Control inputs
-  - Reward history
+- Real-time performance metrics:
+  - Pitch and yaw angles
+  - Gimbal control inputs
+  - Step counter and cumulative reward
+  - Episode statistics
 
 ### Reinforcement Learning Integration
 - PPO (Proximal Policy Optimization) agent for control
 - Training features:
-  - Custom reward function for stability
-  - State space: position, velocity, orientation, angular velocity
-  - Action space: gimbal angles
-- Model saving and loading
-- Fallback to random actions if model unavailable
+  - Custom reward function for stability optimization
+  - State space: pitch, yaw, pitch_rate, yaw_rate
+  - Action space: gimbal angles (pitch, yaw)
+  - Soft penalties for orientation and angular velocity
+  - Stability and vertical orientation bonuses
+- Model management:
+  - Automatic saving of best models
+  - Model checkpointing during training
+  - Fallback to random actions if model unavailable
 
 ---
 
@@ -73,26 +85,21 @@ tvc_project/
 ### 1. 📁 Clone and Navigate
 
 ```bash
-git clone https://github.com/your-org/tvc_project.git
-cd tvc_project
+git clone https://github.com/your-org/AI-TVC.git
+cd AI-TVC
 ```
 
-### 2. 🐍 Create Virtual Environment (optional)
+### 2. 🐍 Create Virtual Environment
 
 ```bash
-python -m venv sb3env
-source sb3env/bin/activate  # On Windows: sb3env\Scripts\activate
+python -m venv myenv
+source myenv/bin/activate  # On Windows: myenv\Scripts\activate
 ```
 
 ### 3. 📦 Install Dependencies
 
 ```bash
 pip install -r requirements.txt
-```
-
-If you are missing pyserial, install it manually:
-```bash
-pip install pyserial
 ```
 
 ### 4. ⚙️ Run the System
@@ -102,6 +109,11 @@ pip install pyserial
 python train_ppo_tvc.py
 ```
 
+#### Safe Training with Early Stopping
+```bash
+python safe_training.py
+```
+
 #### Test PPO Agent (With IMU + Servo Integration)
 Ensure IMU sends: `pitch,yaw,pitch_rate,yaw_rate\n` via serial
 Ensure servos accept: `pitch_gimbal,yaw_gimbal\n`
@@ -109,14 +121,9 @@ Ensure servos accept: `pitch_gimbal,yaw_gimbal\n`
 python test_ppo_tvc.py
 ```
 
-#### Run Simulation Only
+#### Evaluate Trained Model
 ```bash
-python test_simulation.py
-```
-
-#### Visualize Log Output
-```bash
-python plot_tvc_log.py
+python evaluate_tvc.py
 ```
 
 ---
@@ -124,9 +131,45 @@ python plot_tvc_log.py
 ## 🧠 Requirements
 
 - Python 3.8+
+- Stable-Baselines3 for PPO implementation
+- Matplotlib for visualization
+- NumPy for numerical computations
 - ESP32 (or similar) streaming IMU data via serial
 - Servo controller (Arduino, PCA9685, etc.)
 - USB Serial connection to host PC
+
+---
+
+## 📊 Model Files
+
+The repository includes pre-trained models for immediate use:
+- `final_model.zip` - Final trained PPO model
+- `best_model/` - Directory containing the best performing model
+- `vec_normalize.pkl` - Vector normalization parameters (excluded from git)
+
+Training checkpoints and intermediate models are excluded from git to keep the repository clean.
+
+---
+
+## 🎯 Key Features
+
+### Safety Features
+- Early stopping during training to prevent overfitting
+- Gimbal angle limits to prevent mechanical damage
+- Episode termination on excessive orientation angles
+- Maximum episode length to prevent infinite loops
+
+### Performance Optimization
+- Efficient physics simulation with configurable time steps
+- Real-time visualization with trajectory tracking
+- Comprehensive logging of control actions and performance
+- Modular design for easy parameter tuning
+
+### Hardware Integration
+- Serial communication for IMU data input
+- Servo control interface for gimbal actuation
+- Real-time control loop with minimal latency
+- Fallback mechanisms for hardware failures
 
 ---
 
