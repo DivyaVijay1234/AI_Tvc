@@ -7,9 +7,33 @@ __pycache__/
 venv/
 .env/
 .venv/
+myenv/
 
-# Model files
-ppo_tvc.zip
+# Model files - exclude training checkpoints but keep final models
+# Training checkpoints (exclude)
+ppo_tvc_model.zip
+phase1_model.zip
+phase2_model.zip
+vec_normalize.pkl
+
+# Keep final/best models (include these in git)
+# final_model.zip
+# best_model/
+# best_model.zip
+
+# Simulation results and logs
+simulation_results/
+*.npy
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.avi
+*.mov
+*.csv
+*.log
+*.tmp
 
 # Jupyter notebook checkpoints
 .ipynb_checkpoints/
@@ -38,3 +62,44 @@ include/
 
 # Ignore README backup or temporary files
 README.md~
+
+# Additional Python patterns
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Data files that might be generated
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.json
+*.yaml
+*.yml
+
+# Specific to this project
+tvc_control_log.csv

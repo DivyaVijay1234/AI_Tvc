@@ -7,21 +7,35 @@ from matplotlib.animation import FuncAnimation
 import os
 from datetime import datetime
 
-def run_rl_simulation(num_episodes=5):
+def run_rl_simulation(num_episodes=5, render_enabled=True):
     """
     Run multiple episodes of rocket simulation using the trained RL model
+    
+    Args:
+        num_episodes: Number of episodes to run
+        render_enabled: Whether to render the simulation (set to False for faster testing)
     """
     # Create environment with simulator enabled
     env = RocketTVCEnv(use_simulator=True)
     
-    # Load the trained model
-    try:
-        model = PPO.load("ppo_tvc_model")
-        print("✅ Successfully loaded PPO model")
-    except Exception as e:
-        print(f"❌ Could not load PPO model: {str(e)}")
+    # Load the trained model (try multiple possible model names)
+    model = None
+    model_names = ["final_model", "phase2_model", "phase1_model", "ppo_tvc_model", "minimal_model"]
+    
+    for model_name in model_names:
+        try:
+            model = PPO.load(model_name)
+            print(f"✅ Successfully loaded {model_name}")
+            break
+        except Exception as e:
+            print(f"❌ Could not load {model_name}: {str(e)}")
+            continue
+    
+    if model is None:
+        print("❌ Could not load any trained model")
         print("Using random actions instead.")
-        model = None
+    else:
+        print(f"🎯 Using model: {model_name}")
     
     # Create results directory
     results_dir = "simulation_results"
@@ -89,8 +103,9 @@ def run_rl_simulation(num_episodes=5):
             total_reward += reward
             step += 1
             
-            # Render current state
-            env.render()
+            # Render current state (less frequently to avoid lag)
+            if render_enabled and step % 50 == 0:  # Render every 50 steps for slower, smoother animation
+                env.render()
             
             if done:
                 break
@@ -273,4 +288,5 @@ def plot_overall_statistics(episode_rewards, episode_lengths, episode_max_angles
     plt.show()
 
 if __name__ == "__main__":
-    run_rl_simulation(num_episodes=5)  # Run 5 episodes by default
+    # You can set render_enabled=False for faster testing without visualization
+    run_rl_simulation(num_episodes=5, render_enabled=True)  # Run 5 episodes by default
